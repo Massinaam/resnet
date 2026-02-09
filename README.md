@@ -6,19 +6,19 @@ This repository contains a set of PyTorch scripts to train a **ResNet18** on **C
 - **Pruning** (structured and unstructured) with sparsity analysis and simple scoring.
 - **Factorization** (SVD decomposition of Conv layers) with plots comparing accuracy vs parameters/compression.
 
-Most scripts assume a local ResNet implementation available as `from models import resnet` (e.g., `models/resnet.py`). [file:35][file:36][file:33][file:34][file:17]
+Most scripts assume a local ResNet implementation available as `from models import resnet` (e.g., `models/resnet.py`). 
 
 ---
 
 ## What was done (high-level)
 
-- Trained a baseline ResNet18 on CIFAR‑10 with standard normalization and data augmentation (random crop + horizontal flip). [file:35]
-- Ran (or reconstructed) Optuna studies to pick hyperparameters such as batch size, LR, optimizer, weight decay, scheduler parameters, and epochs. [file:35][file:29]
+- Trained a baseline ResNet18 on CIFAR‑10 with standard normalization and data augmentation (random crop + horizontal flip). 
+- Ran (or reconstructed) Optuna studies to pick hyperparameters such as batch size, LR, optimizer, weight decay, scheduler parameters, and epochs. 
 - Implemented and tested:
-  - **BinaryConnect** training loop (binarize weights for forward/backward, restore FP weights for updates, then clip weights). [file:17][file:18]
-  - **FP16 (half precision)** inference/training patterns (casting inputs to `half` and using `autocast` on CUDA in several pruning/combination scripts). [file:36][file:33][file:16][file:20]
-  - **Structured pruning** via `prune.ln_structured(..., dim=0)` on conv/linear layers + optional “dense/compact” saving. [file:33]
-  - **Unstructured pruning** via `prune.l1_unstructured` + sparsity per layer plots. [file:36]
+  - **BinaryConnect** training loop (binarize weights for forward/backward, restore FP weights for updates, then clip weights). 
+  - **FP16 (half precision)** inference/training patterns (casting inputs to `half` and using `autocast` on CUDA in several pruning/combination scripts). 
+  - **Structured pruning** via `prune.ln_structured(..., dim=0)` on conv/linear layers + optional “dense/compact” saving. 
+  - **Unstructured pruning** via `prune.l1_unstructured` + sparsity per layer plots. 
   - **SVD factorization** for Conv2d layers (especially 3×3 convs) and comparison across ranks with multiple plots. [file:34]
 
 ---
@@ -26,28 +26,28 @@ Most scripts assume a local ResNet implementation available as `from models impo
 ## Repository scripts
 
 ### Training + Optuna
-- `resnet_train.py`: trains ResNet18 on CIFAR‑10 using *best Optuna hyperparameters* (hard-coded `best_params`), logs train/test curves, saves metrics to pickle, saves checkpoint. [file:35]
-- `optuna_study.py`: reconstructs an Optuna study from saved trial data, saves Optuna visualization figures (optimization history, hyperparameter importance, parallel coordinates, contour). [file:29]
+- `resnet_train.py`: trains ResNet18 on CIFAR‑10 using *best Optuna hyperparameters* (hard-coded `best_params`), logs train/test curves, saves metrics to pickle, saves checkpoint. 
+- `optuna_study.py`: reconstructs an Optuna study from saved trial data, saves Optuna visualization figures (optimization history, hyperparameter importance, parallel coordinates, contour). 
 
 ### Quantization
-- `half_quantization.py`: FP16-related quantization workflow (half precision). [file:24]
-- `binaryconnect.py`: defines a `BC` wrapper (save full-precision weights, binarize, restore, clip). [file:18]
-- `bc_quantization.py`: full BinaryConnect training/eval pipeline + plots + rough model-size/throughput analysis, saves `bc.pth` and metrics pickle. [file:17]
+- `half_quantization.py`: FP16-related quantization workflow (half precision). 
+- `binaryconnect.py`: defines a `BC` wrapper (save full-precision weights, binarize, restore, clip). 
+- `bc_quantization.py`: full BinaryConnect training/eval pipeline + plots + rough model-size/throughput analysis, saves `bc.pth` and metrics pickle. 
 
 ### Pruning
-- `structured_pruning.py`: structured pruning + short finetune + accuracy eval + MAC counting + sparsity plot + compact/dense saving. [file:33]
-- `unstructured_pruning.py`: unstructured pruning + short finetune + accuracy eval + MAC counting + sparsity plot + simple score. [file:36]
-- `combination_structured.py`: “structured pruning + FP16” combined flow + MAC counting + score + sparsity plot. [file:16]
-- `combination_unstructured.py`: “unstructured pruning + FP16” combined flow + MAC counting + score + sparsity plot. [file:20]
-- Additional variants: `pruning_quantized.py`, `pruning_binarized.py`. [file:31][file:28]
+- `structured_pruning.py`: structured pruning + short finetune + accuracy eval + MAC counting + sparsity plot + compact/dense saving. 
+- `unstructured_pruning.py`: unstructured pruning + short finetune + accuracy eval + MAC counting + sparsity plot + simple score.
+- `combination_structured.py`: “structured pruning + FP16” combined flow + MAC counting + score + sparsity plot.
+- `combination_unstructured.py`: “unstructured pruning + FP16” combined flow + MAC counting + score + sparsity plot.
+- Additional variants: `pruning_quantized.py`, `pruning_binarized.py`. 
 
 ### Factorization
-- `svd.py`: replaces eligible conv layers with an SVD-based two-layer approximation (rank configurable), trains and compares ranks, saves multiple figures in `plotresults/`. [file:34]
-- `factorization.py`, `factorization_plot.py`, `fac.py`: utilities to load metrics/checkpoints and generate plots (assumes additional factorization modules/paths exist). [file:23][file:21][file:19]
+- `svd.py`: replaces eligible conv layers with an SVD-based two-layer approximation (rank configurable), trains and compares ranks, saves multiple figures in `plotresults/`. 
+- `factorization.py`, `factorization_plot.py`, `fac.py`: utilities to load metrics/checkpoints and generate plots (assumes additional factorization modules/paths exist). 
 
 ### Plot helpers / misc
-- `plot.py`, `plotgr.py`, `graph.py`, `ratio_unstruc.py`: extra plotting/analysis scripts. [file:30][file:27][file:22][file:32]
-- `NAS.py`, `pl.py`: NAS/prototyping utilities. [file:25][file:26]
+- `plot.py`, `plotgr.py`, `graph.py`, `ratio_unstruc.py`: extra plotting/analysis scripts.
+- `NAS.py`, `pl.py`: NAS/prototyping utilities.
 
 ---
 
